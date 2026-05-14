@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Codex Session Manager",
+  "version": "0.1.0",
+  "identifier": "com.zhang.codex-session-manager",
+  "build": {
+    "frontendDist": "../public"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Codex Session Manager",
+        "width": 1480,
+        "height": 980,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all"
+  }
+}

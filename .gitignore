@@ -1,0 +1,24 @@
+# Node / local runtime
+runtime/
+node_modules/
+
+# Logs and local state
+*.log
+manager-state.json
+
+# PowerShell / Windows local noise
+Thumbs.db
+Desktop.ini
+
+# Rust / Tauri build outputs
+src-tauri/target/
+src-tauri/gen/
+
+# Optional editor files
+.vscode/
+.idea/
+
+# OS / temp
+*.tmp
+*.temp
+
