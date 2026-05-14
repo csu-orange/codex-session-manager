@@ -56,9 +56,15 @@ The repository includes a GitHub Actions workflow at:
 
 It will:
 
-- build the Tauri app on Windows, Linux, and macOS
+- build a portable Windows `.exe`
+- build Tauri release bundles on Linux and macOS
 - create or update a GitHub Release for pushed tags like `v0.1.0`
 - upload platform release assets to that release
+
+Important:
+
+- the git tag must match `src-tauri/Cargo.toml` version
+- the workflow now enforces that match before building
 
 To publish a new release:
 

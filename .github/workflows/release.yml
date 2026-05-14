@@ -7,7 +7,64 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish-tauri:
+  validate-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify tag matches Cargo version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(grep '^version = ' src-tauri/Cargo.toml | head -n1 | sed -E 's/version = "([^"]+)"/\1/')
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Tag version ($TAG) does not match Cargo.toml version ($VERSION)."
+            exit 1
+          fi
+
+  publish-windows-portable:
+    needs: validate-version
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build portable Windows executable
+        shell: powershell
+        run: |
+          cargo tauri build --no-bundle
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item `
+            -LiteralPath "src-tauri\target\release\codex-session-manager.exe" `
+            -Destination "dist\codex-session-manager_${{ github.ref_name }}_windows_x64_portable.exe" `
+            -Force
+
+      - name: Upload portable Windows executable to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Codex Session Manager ${{ github.ref_name }}
+          body: Portable desktop release for Codex Session Manager.
+          draft: true
+          prerelease: false
+          files: dist/codex-session-manager_${{ github.ref_name }}_windows_x64_portable.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-tauri-bundles:
+    needs: validate-version
     permissions:
       contents: write
 
@@ -18,8 +75,6 @@ jobs:
           - platform: macos-latest
             args: ""
           - platform: ubuntu-22.04
-            args: ""
-          - platform: windows-latest
             args: ""
 
     runs-on: ${{ matrix.platform }}
@@ -52,7 +107,7 @@ jobs:
             librsvg2-dev \
             patchelf
 
-      - name: Build and publish Tauri app
+      - name: Build and publish Tauri bundles
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
