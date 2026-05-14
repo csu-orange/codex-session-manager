@@ -1,6 +1,6 @@
 ﻿[package]
 name = "codex-session-manager"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 
 [build-dependencies]
@@ -15,4 +15,5 @@ tauri = { version = "2", features = [] }
 thiserror = "2"
 toml = "0.8"
 walkdir = "2"
+
 
