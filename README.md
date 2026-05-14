@@ -57,23 +57,28 @@ The repository includes a GitHub Actions workflow at:
 It will:
 
 - build a portable Windows `.exe`
-- build Tauri release bundles on Linux and macOS
-- create or update a GitHub Release for pushed tags like `v0.1.0`
-- upload platform release assets to that release
+- publish a public GitHub Release for pushed tags like `v0.1.0`
+- upload the Windows portable executable to that release
 
 Important:
 
 - the git tag must match `src-tauri/Cargo.toml` version
+- the git tag must match `src-tauri/tauri.conf.json` version
 - the workflow now enforces that match before building
 
 To publish a new release:
 
 ```powershell
-git tag v0.1.0
-git push origin v0.1.0
+.\scripts\release.ps1 0.1.2
 ```
 
-You can also run the workflow manually from the GitHub Actions page.
+The script will:
+
+- update the app version
+- commit the version bump
+- push `main`
+- create the matching git tag
+- push the tag and trigger the release workflow
 
 ## Notes
 

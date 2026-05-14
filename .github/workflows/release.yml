@@ -23,6 +23,16 @@ jobs:
             exit 1
           fi
 
+      - name: Verify tag matches Tauri config version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(grep '"version":' src-tauri/tauri.conf.json | head -n1 | sed -E 's/.*"version": "([^"]+)".*/\1/')
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Tag version ($TAG) does not match tauri.conf.json version ($VERSION)."
+            exit 1
+          fi
+
   publish-windows-portable:
     needs: validate-version
     runs-on: windows-latest
@@ -51,71 +61,14 @@ jobs:
             -Destination "dist\codex-session-manager_${{ github.ref_name }}_windows_x64_portable.exe" `
             -Force
 
-      - name: Upload portable Windows executable to release
+      - name: Publish portable Windows executable
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Codex Session Manager ${{ github.ref_name }}
-          body: Portable desktop release for Codex Session Manager.
-          draft: true
+          body: Portable Windows release for Codex Session Manager.
+          draft: false
           prerelease: false
           files: dist/codex-session-manager_${{ github.ref_name }}_windows_x64_portable.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  publish-tauri-bundles:
-    needs: validate-version
-    permissions:
-      contents: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: macos-latest
-            args: ""
-          - platform: ubuntu-22.04
-            args: ""
-
-    runs-on: ${{ matrix.platform }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Setup Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install Linux system dependencies
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            build-essential \
-            curl \
-            wget \
-            file \
-            libxdo-dev \
-            libssl-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev \
-            patchelf
-
-      - name: Build and publish Tauri bundles
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: src-tauri
-          tagName: ${{ github.ref_name }}
-          releaseName: "Codex Session Manager ${{ github.ref_name }}"
-          releaseBody: "Portable desktop release for Codex Session Manager."
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
