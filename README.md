@@ -48,6 +48,27 @@ On Windows, the built executable will be under:
 
 `src-tauri/target/release/codex-session-manager.exe`
 
+## GitHub Releases
+
+The repository includes a GitHub Actions workflow at:
+
+`/.github/workflows/release.yml`
+
+It will:
+
+- build the Tauri app on Windows, Linux, and macOS
+- create or update a GitHub Release for pushed tags like `v0.1.0`
+- upload platform release assets to that release
+
+To publish a new release:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+You can also run the workflow manually from the GitHub Actions page.
+
 ## Notes
 
 - The app reads the current user's `.codex` directory by default
