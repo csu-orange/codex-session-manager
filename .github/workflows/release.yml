@@ -6,6 +6,7 @@ on:
       - "v*"
     branches:
       - "test/*"
+      - "copilot/*"
   workflow_dispatch:
 
 jobs:
